@@ -1,15 +1,5 @@
 from dataclasses import dataclass, field
 
-def _get_previous_hole_id(hole_id: int) -> int:
-    """
-    Helper function to get the previous hole ID.
-    Args:
-        hole_id (int): The current hole ID.
-    Returns:
-        int: The previous hole ID.
-    """
-    return 18 if hole_id == 1 else hole_id - 1
-
 @dataclass
 class Hole:
     """
@@ -21,7 +11,10 @@ class Hole:
     """
     _hole_id: int
     _par: int
-    _previous_hole_id: int = field(default_factory=_get_previous_hole_id)
+    _previous_hole_id: int = field(init=False)
+
+    def __post__init__(self):
+        self._calculate_previous_hole_id()
 
     @property
     def hole_id(self):
@@ -46,3 +39,9 @@ class Hole:
     @property
     def previous_hole_id(self):
         return self._previous_hole_id
+
+    def _calculate_previous_hole_id(self) -> None:
+        """
+        Helper method to calculate the previous hole ID.
+        """
+        self.previous_hole_id = (18 if self.hole_id == 1 else self.hole_id - 1) if self.hole_id > 1 else None
