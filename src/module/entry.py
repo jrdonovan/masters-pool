@@ -70,10 +70,12 @@ class Entry:
         self._strokes = value
 
     def to_dict(self):
-        return {
+        d = {
             "timestamp": self._timestamp,
             "email": self._email,
-            "name": self._name,
-            "players": self._players,
-            "strokes": self._strokes
+            "name": self._name
         }
+        parsed_players = {k: list(map(lambda x: x.strip(), v.split(","))) for k, v in self._players.items()}
+        d = {**d, **parsed_players}
+        d["strokes"] = self._strokes
+        return d
