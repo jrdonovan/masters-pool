@@ -1,15 +1,17 @@
+from streamlit import secrets
+
 import api.apiBase as APIBase
 
 class LiveGolfData(APIBase):
     def __init__(self):
         base_url = "https://live-golf-data.p.rapidapi.com/"
         headers = {
-            "X-RapidAPI-Key": "your_api_key_here", # TODO: Replace with actual API key
+            "X-RapidAPI-Key": secrets["RAPID_API_KEY"],
             "X-RapidAPI-Host": "live-golf-data.p.rapidapi.com"
         }
         super().__init__(base_url, headers, timeout=30)
 
-    def get_leaderboard(self, org_id: int, tourn_id: str, year: str, round_id: str = None) -> dict:
+    def get_leaderboard(self, org_id: int = secrets["ORG_ID"], tourn_id: str = secrets["TOURN_ID"], year: str = secrets["YEAR"], round_id: str = None) -> dict:
         """
         Fetches the leaderboard data
         """
@@ -32,7 +34,7 @@ class LiveGolfData(APIBase):
         }
         return super(APIBase, self).send_request("players", params=params)
 
-    def get_tournaments(self, org_id: int = None, tourn_id: str = None, year: str = None) -> dict:
+    def get_tournaments(self, org_id: int = secrets["ORG_ID"], tourn_id: str = secrets["TOURN_ID"], year: str = secrets["YEAR"]) -> dict:
         """
         Fetches tournament data
         """
@@ -43,7 +45,7 @@ class LiveGolfData(APIBase):
         }
         return super(APIBase, self).send_request("tournaments", params=params)
 
-    def get_scorecards(self, org_id: int, tourn_id: str, year: str, player_id: str, round_id: str = None) -> dict:
+    def get_scorecards(self, player_id: str, org_id: int = secrets["ORG_ID"], tourn_id: str = secrets["TOURN_ID"], year: str = secrets["YEAR"], round_id: str = None) -> dict:
         """
         Fetches scorecard data
         """
