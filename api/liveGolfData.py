@@ -19,7 +19,7 @@ class LiveGolfData(APIBase):
             "year": year,
             "roundId": round_id
         }
-        return super().send_request("leaderboard", params=params)
+        return super(APIBase, self).send_request("leaderboard", params=params)
 
     def get_players(self, last_name: str = None, first_name: str = None, player_id: str = None) -> dict:
         """
@@ -30,7 +30,7 @@ class LiveGolfData(APIBase):
             "firstName": first_name,
             "playerId": player_id
         }
-        return super().send_request("players", params=params)
+        return super(APIBase, self).send_request("players", params=params)
 
     def get_tournaments(self, org_id: int = None, tourn_id: str = None, year: str = None) -> dict:
         """
@@ -41,7 +41,7 @@ class LiveGolfData(APIBase):
             "tournId": tourn_id,
             "year": year
         }
-        return super().send_request("tournaments", params=params)
+        return super(APIBase, self).send_request("tournaments", params=params)
 
     def get_scorecards(self, org_id: int, tourn_id: str, year: str, player_id: str, round_id: str = None) -> dict:
         """
@@ -54,4 +54,4 @@ class LiveGolfData(APIBase):
             "playerId": player_id,
             "roundId": round_id
         }
-        return super().send_request("scorecards", params=params)
+        return super(APIBase, self).send_request("scorecards", params=params)
