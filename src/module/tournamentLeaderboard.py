@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime
+import pandas as pd
 from typing import List, Dict
 
 from src.module.player import Player
@@ -100,22 +101,25 @@ class TournamentLeaderboard:
             raise ValueError("Players must be an OrderedDict.")
         self._players = value
 
-    def initialize_players(self, leaderboard_data: Dict) -> None:
+    def initialize_players(self, leaderboard_data: List) -> None:
         d = OrderedDict()
         for p in leaderboard_data:
             for r in p["rounds"]:
                 r["roundId"] = utils.parse_dict_to_number(r["roundId"])
                 r["strokes"] = utils.parse_dict_to_number(r["strokes"])
 
-            d[p["position"]] = {
-                "status": p["status"],
+            player = Player(
+                _id=p["playerId"],
+                _first_name=p["firstName"],
+                _last_name=p["lastName"],
+                _is_amateur=p["isAmateur"]
+            )
+
+            d[player.full_name] = {
+                "position": p["position"],
+                "status": p["status"].upper(),
                 "total": p["total"],
-                "player": Player(
-                    _id=p["playerId"],
-                    _first_name=p["firstName"],
-                    _last_name=p["lastName"],
-                    _is_amateur=p["isAmateur"]
-                ),
+                "player": player,
                 "rounds": p["rounds"]
             }
         self.players = d
@@ -128,3 +132,25 @@ class TournamentLeaderboard:
                 total=p.playing_info["total"],
                 course_id=p.playing_info["course_id"]
             )
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """
+        Converts the TournamentLeaderboard object to a pandas DataFrame.
+        This method is useful for displaying the leaderboard in a tabular format.
+        """
+        data = []
+        for player_name, player_info in self.players.items():
+            rounds = {r["roundId"]: r["scoreToPar"] for r in player_info["rounds"]}
+            data.append({
+                "Position": player_info["position"],
+                "Player": player_name,
+                "Total Score": player_info["total"],
+                "Round 1": rounds.get(1, "-"),
+                "Round 2": rounds.get(2, "-"),
+                "Round 3": rounds.get(3, "-"),
+                "Round 4": rounds.get(4, "-"),
+                "Status": player_info["status"]
+            })
+        df = pd.DataFrame(data)
+        df.index += 1
+        return df
