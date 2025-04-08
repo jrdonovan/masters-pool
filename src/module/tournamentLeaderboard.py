@@ -32,24 +32,26 @@ class TournamentLeaderboard:
     _players: List[Player] = field(init=False)
 
     def __post_init__(self):
+        players = []
         for p in self.leaderboard_rows:
             player_args = {
-                "id": p["playerId"],
-                "first_name": p["firstName"],
-                "last_name": p["lastName"],
-                "is_amateur": p["isAmateur"]
+                "_id": p["playerId"],
+                "_first_name": p["firstName"],
+                "_last_name": p["lastName"],
+                "_is_amateur": p["isAmateur"]
             }
-            Player(
+            player_obj = Player(
                 **player_args,
-                playing_info={
+                _playing_info={
                     "course_id": p["courseId"],
                     "status": p["status"],
                     "position": p["position"],
                     "total": p["total"],
-                    "current_round_score": p["currentRoundScore"],
                     "total_strokes_from_completed_rounds": p["totalStrokesFromCompletedRounds"]
                 }
             )
+            players.append(player_obj)
+        self.players = players
 
     @property
     def org_id(self):
@@ -87,14 +89,12 @@ class TournamentLeaderboard:
     def leaderboard_rows(self):
         return self._leaderboard_rows
 
-    @leaderboard_rows.setter
-    def leaderboard_rows(self, value):
-        self._leaderboard_rows = value
-
     @property
     def players(self):
         return self._players
 
     @players.setter
-    def players(self, value):
+    def players(self, value: List[Player]):
+        if not isinstance(value, list):
+            raise ValueError("Players must be a list.")
         self._players = value
