@@ -1,57 +1,44 @@
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Dict
 
 from src.module.player import Player
+import src.utils as utils
 
 @dataclass
 class TournamentLeaderboard:
     """
     Represents a golf tournament leaderboard.
     Attributes:
-        org_id (int): The organization ID.
-        year (str): The year of the tournament.
-        tourn_id (str): The tournament ID.
-        status (str): The status of the tournament.
-        round_status (str): The status of the round.
-        round_id (str): The round ID.
-        last_updated (datetime): The last updated timestamp.
-        cut_lines (List[Dict]): The cut lines for the tournament.
-        leaderboard_rows (List[Dict]): The leaderboard rows.
-        players (List[Player]): The players in the tournament.
+        _org_id (int): The organization ID.
+        _year (str): The year of the tournament.
+        _tourn_id (str): The tournament ID.
+        _current_status (str): The status of the tournament.
+        _current_round_status (str): The status of the round.
+        _current_round_id (int): The round ID.
+        _last_updated (datetime): The last updated timestamp.
+        _cut_lines (List[Dict]): The cut lines for the tournament.
+        _players (OrderedDict): The players in the tournament.
     """
     _org_id: int
     _year: str
     _tourn_id: str
-    _status: str
-    _round_status: str
-    _round_id: str
+    _current_status: str
+    _current_round_status: str
+    _current_round_id: int
     _last_updated: datetime
     _cut_lines: List[Dict]
-    _leaderboard_rows: List[Dict]
-    _players: List[Player] = field(init=False)
+    _players: OrderedDict = field(init=False, default_factory=OrderedDict)
 
     def __post_init__(self):
-        players = []
-        for p in self.leaderboard_rows:
-            player_args = {
-                "_id": p["playerId"],
-                "_first_name": p["firstName"],
-                "_last_name": p["lastName"],
-                "_is_amateur": p["isAmateur"]
-            }
-            player_obj = Player(
-                **player_args,
-                _playing_info={
-                    "course_id": p["courseId"],
-                    "status": p["status"],
-                    "position": p["position"],
-                    "total": p["total"],
-                    "total_strokes_from_completed_rounds": p["totalStrokesFromCompletedRounds"]
-                }
-            )
-            players.append(player_obj)
-        self.players = players
+        self.current_round_id = utils.parse_dict_to_number(self.current_round_id)
+
+        for cl in self.cut_lines:
+            cut_count = cl["cutCount"]
+            cl["cutCount"] = utils.parse_dict_to_number(cut_count)
+
+        self.last_updated = utils.parse_dict_to_date(self.last_updated)
 
     @property
     def org_id(self):
@@ -66,35 +53,78 @@ class TournamentLeaderboard:
         return self._tourn_id
 
     @property
-    def status(self):
-        return self._status
+    def current_status(self):
+        return self._current_status
 
     @property
-    def round_status(self):
-        return self._round_status
+    def current_round_status(self):
+        return self._current_round_status
 
     @property
-    def round_id(self):
-        return self._round_id
+    def current_round_id(self):
+        return self._current_round_id
+
+    @current_round_id.setter
+    def current_round_id(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Current Round ID must be an integer.")
+        self._current_round_id = value
 
     @property
     def last_updated(self):
         return self._last_updated
 
+    @last_updated.setter
+    def last_updated(self, value: datetime):
+        if not isinstance(value, datetime):
+            raise ValueError("Last updated must be a datetime object.")
+        self._last_updated = value
+
     @property
     def cut_lines(self):
         return self._cut_lines
 
-    @property
-    def leaderboard_rows(self):
-        return self._leaderboard_rows
+    @cut_lines.setter
+    def cut_lines(self, value: List[Dict]):
+        if not isinstance(value, list):
+            raise ValueError("Cut lines must be a list.")
+        self._cut_lines = value
 
     @property
     def players(self):
         return self._players
 
     @players.setter
-    def players(self, value: List[Player]):
-        if not isinstance(value, list):
-            raise ValueError("Players must be a list.")
+    def players(self, value: OrderedDict):
+        if not isinstance(value, OrderedDict):
+            raise ValueError("Players must be an OrderedDict.")
         self._players = value
+
+    def initialize_players(self, leaderboard_data: Dict) -> None:
+        d = OrderedDict()
+        for p in leaderboard_data:
+            for r in p["rounds"]:
+                r["roundId"] = utils.parse_dict_to_number(r["roundId"])
+                r["strokes"] = utils.parse_dict_to_number(r["strokes"])
+
+            d[p["position"]] = {
+                "status": p["status"],
+                "total": p["total"],
+                "player": Player(
+                    _id=p["playerId"],
+                    _first_name=p["firstName"],
+                    _last_name=p["lastName"],
+                    _is_amateur=p["isAmateur"]
+                ),
+                "rounds": p["rounds"]
+            }
+        self.players = d
+
+    def initialize_player_scorecards(self):
+        for p in self.players:
+            p.initialize_scorecard(
+                status=p.playing_info["status"],
+                position=p.playing_info["position"],
+                total=p.playing_info["total"],
+                course_id=p.playing_info["course_id"]
+            )
