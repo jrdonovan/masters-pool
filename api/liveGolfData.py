@@ -21,6 +21,7 @@ class LiveGolfData(APIBase):
             "year": year,
             "roundId": round_id
         }
+        print(f"Fetching leaderboard for org_id: {org_id}, tourn_id: {tourn_id}, year: {year}, round_id: {round_id}")
         return super().send_request("leaderboard", params=params)
 
     def get_players(self, last_name: str = None, first_name: str = None, player_id: str = None) -> dict:
@@ -32,6 +33,7 @@ class LiveGolfData(APIBase):
             "firstName": first_name,
             "playerId": player_id
         }
+        print(f"Fetching players with last_name: {last_name}, first_name: {first_name}, player_id: {player_id}")
         return super().send_request("players", params=params)
 
     def get_tournaments(self, org_id: int = secrets["ORG_ID"], tourn_id: str = secrets["TOURN_ID"], year: str = secrets["YEAR"]) -> dict:
@@ -43,6 +45,7 @@ class LiveGolfData(APIBase):
             "tournId": tourn_id,
             "year": year
         }
+        print(f"Fetching tournaments for org_id: {org_id}, tourn_id: {tourn_id}, year: {year}")
         return super().send_request("tournaments", params=params)
 
     def get_scorecards(self, player_id: str, org_id: int = secrets["ORG_ID"], tourn_id: str = secrets["TOURN_ID"], year: str = secrets["YEAR"], round_id: str = None) -> dict:
@@ -56,4 +59,5 @@ class LiveGolfData(APIBase):
             "playerId": player_id,
             "roundId": round_id
         }
-        return super().send_request("scorecards", params=params)
+        print(f"Fetching scorecard for player_id: {player_id}, org_id: {org_id}, tourn_id: {tourn_id}, year: {year}, round_id: {round_id}")
+        return super().send_request("scorecard", params=params)
