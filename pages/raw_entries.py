@@ -4,8 +4,8 @@ from streamlit_autorefresh import st_autorefresh
 from src.utils.entries import load_entries
 
 
-st.set_page_config(page_title="Raw Entries", page_icon=":golfer:", layout="wide")
-st.title("Raw Entries")
+st.set_page_config(page_title="Entries", page_icon=":golfer:", layout="wide")
+st.title("Entries")
 
 # 🔁 Auto-refresh every 1 minute
 st_autorefresh(interval=60 * 1000, key="refresh")
