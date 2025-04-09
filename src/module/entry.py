@@ -70,8 +70,11 @@ class Entry:
             raise ValueError("Strokes must be an integer.")
         self._strokes = value
 
-    def to_dict(self) -> dict:
-        d = {"timestamp": self._timestamp, "email": self._email, "name": self._name}
+    def to_dict(self, descriptive: bool = False) -> dict:
+        d = {"name": self._name}
+        if descriptive:
+            d["timestamp"] = self.timestamp
+            d["email"] = self.email
         parsed_players = {
             k: list(map(lambda x: x.strip(), v.split(",")))
             for k, v in self._players.items()
