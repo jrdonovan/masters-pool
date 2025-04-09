@@ -1,4 +1,5 @@
 from api.apiBase import APIBase
+import src.cache as cache
 from src.utils.streamlit import get_secret
 
 
@@ -21,6 +22,11 @@ class LiveGolfData(APIBase):
         """
         Fetches the leaderboard data
         """
+        latest_file = cache.get_latest_cache_file("leaderboard")
+
+        if cache.is_cache_fresh(latest_file):
+            print("Fetched leaderboard data from cache.")
+            return cache.load_from_cache(latest_file)
         params = {
             "orgId": org_id,
             "tournId": tourn_id,
@@ -28,9 +34,11 @@ class LiveGolfData(APIBase):
             "roundId": round_id,
         }
         print(
-            f"Fetching leaderboard for org_id: {org_id}, tourn_id: {tourn_id}, year: {year}, round_id: {round_id}"
+            f"Fetching and caching leaderboard for org_id: {org_id}, tourn_id: {tourn_id}, year: {year}, round_id: {round_id}"
         )
-        return super().send_request("leaderboard", params=params)
+        data = super().send_request("leaderboard", params=params)
+        cache.save_to_cache(data, "leaderboard")
+        return data
 
     def get_players(
         self, last_name: str = None, first_name: str = None, player_id: str = None
@@ -70,6 +78,12 @@ class LiveGolfData(APIBase):
         """
         Fetches scorecard data
         """
+        filepath = f"scorecard/{player_id}"
+        latest_file = cache.get_latest_cache_file(filepath)
+
+        if cache.is_cache_fresh(latest_file):
+            print("Fetched scorecard from cache.")
+            return cache.load_from_cache(latest_file)
         params = {
             "orgId": org_id,
             "tournId": tourn_id,
@@ -78,6 +92,19 @@ class LiveGolfData(APIBase):
             "roundId": round_id,
         }
         print(
-            f"Fetching scorecard for player_id: {player_id}, org_id: {org_id}, tourn_id: {tourn_id}, year: {year}, round_id: {round_id}"
+            f"Fetching and caching scorecard for player_id: {player_id}, org_id: {org_id}, tourn_id: {tourn_id}, year: {year}, round_id: {round_id}"
         )
-        return super().send_request("scorecard", params=params)
+        data = super().send_request("scorecard", params=params)
+        cache.save_to_cache(data, filepath, f"scorecard_{player_id}")
+        return data
+
+    def get_scorecards_batch(
+        self,
+        player_ids: list
+    ) -> dict:
+        """
+        Fetches scorecard data for a batch of player IDs
+        """
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            results = list(executor.map(self.get_scorecard, player_ids))
+        return results
