@@ -5,7 +5,7 @@ import pandas as pd
 from typing import List, Dict
 
 from src.module.player import Player
-import src.utils as utils
+import src.utils.parse as parse
 
 
 @dataclass
@@ -35,13 +35,13 @@ class TournamentLeaderboard:
     _players: OrderedDict = field(init=False, default_factory=OrderedDict)
 
     def __post_init__(self):
-        self.current_round_id = utils.parse_dict_to_number(self.current_round_id)
+        self.current_round_id = parse.parse_dict_to_number(self.current_round_id)
 
         for cl in self.cut_lines:
             cut_count = cl["cutCount"]
-            cl["cutCount"] = utils.parse_dict_to_number(cut_count)
+            cl["cutCount"] = parse.parse_dict_to_number(cut_count)
 
-        self.last_updated = utils.parse_dict_to_date(self.last_updated)
+        self.last_updated = parse.parse_dict_to_date(self.last_updated)
 
     @property
     def org_id(self):
@@ -107,8 +107,8 @@ class TournamentLeaderboard:
         d = OrderedDict()
         for p in leaderboard_data:
             for r in p["rounds"]:
-                r["roundId"] = utils.parse_dict_to_number(r["roundId"])
-                r["strokes"] = utils.parse_dict_to_number(r["strokes"])
+                r["roundId"] = parse.parse_dict_to_number(r["roundId"])
+                r["strokes"] = parse.parse_dict_to_number(r["strokes"])
 
             player = Player(
                 _id=p["playerId"],
