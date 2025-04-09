@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.module.fanduel import FanDuel
+import src.utils.parse as parse
 
 
 @dataclass
@@ -19,11 +20,14 @@ class Hole:
     _id: int
     _par: int
     _score: int
-    _previous_hole_id: int = field(init=False)
+    _previous_hole_id: int = field(init=False, repr=False)
     _result: str = field(init=False, default="")
     _fanduel_score: float = field(init=False, default=0.0)
 
-    def __post__init__(self):
+    def __post_init__(self):
+        self.id = parse.parse_dict_to_number(self.id)
+        self.par = parse.parse_dict_to_number(self.par)
+        self.score = parse.parse_dict_to_number(self.score)
         self._calculate_previous_hole_id()
         self._calculate_hole_result()
         self._calculate_fanduel_score()
@@ -32,17 +36,41 @@ class Hole:
     def id(self):
         return self._id
 
+    @id.setter
+    def id(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("ID must be an integer.")
+        self._id = value
+
     @property
     def par(self):
         return self._par
+
+    @par.setter
+    def par(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Par must be an integer.")
+        self._par = value
 
     @property
     def score(self):
         return self._score
 
+    @score.setter
+    def score(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Score must be an integer.")
+        self._score = value
+
     @property
     def previous_hole_id(self):
         return self._previous_hole_id
+
+    @previous_hole_id.setter
+    def previous_hole_id(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Previous hole ID must be an integer.")
+        self._previous_hole_id = value
 
     @property
     def result(self):
@@ -68,9 +96,7 @@ class Hole:
         """
         Helper method to calculate the previous hole ID.
         """
-        self.previous_hole_id = (
-            (18 if self.id == 1 else self.id - 1) if self.id > 1 else None
-        )
+        self.previous_hole_id = 18 if self.id == 1 else self.id - 1
 
     def _calculate_hole_result(self) -> None:
         diff = self.par - self.score
