@@ -8,14 +8,15 @@ class Hole:
     """
     Represents a hole in the golf course.
     Attributes:
-        _hole_id (int): The ID of the hole.
+        _id (int): The ID of the hole.
         _par (int): The par value of the hole.
         _score (int): The number of strokes taken by the player on the hole.
         _previous_hole_id (int): The ID of the previous hole.
         _result (str): The result of the hole (e.g., "EAGLE", "BIRDIE", "PAR", "BOGEY").
+        _fanduel_score (float): The FanDuel score for the hole.
     """
 
-    _hole_id: int
+    _id: int
     _par: int
     _score: int
     _previous_hole_id: int = field(init=False)
@@ -25,10 +26,11 @@ class Hole:
     def __post__init__(self):
         self._calculate_previous_hole_id()
         self._calculate_hole_result()
+        self._calculate_fanduel_score()
 
     @property
-    def hole_id(self):
-        return self._hole_id
+    def id(self):
+        return self._id
 
     @property
     def par(self):
@@ -67,9 +69,7 @@ class Hole:
         Helper method to calculate the previous hole ID.
         """
         self.previous_hole_id = (
-            (18 if self.hole_id == 1 else self.hole_id - 1)
-            if self.hole_id > 1
-            else None
+            (18 if self.id == 1 else self.id - 1) if self.id > 1 else None
         )
 
     def _calculate_hole_result(self) -> None:
@@ -81,7 +81,7 @@ class Hole:
         else:
             self.result = "EAGLE_OR_BETTER" if diff > 1 else "BIRDIE"
 
-    def calculate_fanduel_score(self) -> float:
+    def _calculate_fanduel_score(self) -> None:
         """
         Calculate the FanDuel score for the hole.
         """
