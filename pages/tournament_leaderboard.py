@@ -58,5 +58,6 @@ st.title("Tournament Leaderboard")
 # 🔁 Auto-refresh every 1 minute
 st_autorefresh(interval=60 * 1000, key="refresh")
 
-df = load_tournament_leaderboard()
+with st.spinner("Refreshing leaderboard..."):
+    df = load_tournament_leaderboard()
 st.dataframe(df)

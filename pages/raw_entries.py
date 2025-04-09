@@ -45,5 +45,6 @@ st.title("Raw Entries")
 # 🔁 Auto-refresh every 1 minute
 st_autorefresh(interval=60 * 1000, key="refresh")
 
-df = load_entries()
+with st.spinner("Refreshing entries..."):
+    df = load_entries()
 st.dataframe(df)
