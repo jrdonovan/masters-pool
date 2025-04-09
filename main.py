@@ -4,24 +4,6 @@ import sys
 import streamlit as st
 
 
-def refresh_entries():
-    """
-    Refreshes the entries from the Google Sheet.
-    """
-    # This function should contain the logic to refresh entries.
-    # For example, it could call a method from EntryFetcher to get new entries.
-    pass
-
-
-def refresh_leaderboard():
-    """
-    Refreshes the leaderboard.
-    """
-    # This function should contain the logic to refresh the leaderboard.
-    # For example, it could call a method from EntryFetcher to get new leaderboard data.
-    pass
-
-
 def main():
     home_page = st.Page("pages/home.py", title="Home")
     entries_page = st.Page("pages/raw_entries.py", title="Raw Entries")
