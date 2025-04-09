@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from unidecode import unidecode
 
 from src.module.scorecard import Scorecard
 from src.utils.scorecard import fetch_scorecards
@@ -27,6 +28,8 @@ class Player:
     _fanduel_score: float = field(init=False, default=0.0)
 
     def __post_init__(self):
+        self.first_name = unidecode(self.first_name)
+        self.last_name = unidecode(self.last_name)
         self.full_name = f"{self.first_name} {self.last_name}"
 
     @property
@@ -37,9 +40,21 @@ class Player:
     def first_name(self):
         return self._first_name
 
+    @first_name.setter
+    def first_name(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("First name must be a string.")
+        self._first_name = value
+
     @property
     def last_name(self):
         return self._last_name
+
+    @last_name.setter
+    def last_name(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("Last name must be a string.")
+        self._last_name = value
 
     @property
     def is_amateur(self):
