@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import datetime
 from dataclasses import dataclass, field
 import pandas as pd
@@ -44,15 +45,27 @@ class Pool:
                 row.get("Timestamp"), "%m/%d/%Y %H:%M:%S"
             )
             players = {
-                k: v
+                k: list(map(lambda x: x.strip(), v.split(",")))
                 for k, v in row.items()
                 if k in {"BSDs", "Tuna Fishies", "Sleepers", "Happy Bois"}
             }  # TODO: Make this more robust
+            d = OrderedDict()
+            for category, player in players.items():
+                if category == "Sleepers":
+                    d["Sleeper"] = player[0]
+                elif category == "Happy Bois":
+                    d["Happy Boi"] = player[0]
+                elif category == "BSDs":
+                    d["BSD 1"] = player[0]
+                    d["BSD 2"] = player[1]
+                elif category == "Tuna Fishies":
+                    d["Tuna Fish 1"] = player[0]
+                    d["Tuna Fish 2"] = player[1]
             entry = Entry(
                 timestamp_dt,
                 row.get("Email Address"),
                 row.get("Entry Name"),
-                players,
+                d,
                 row.get("Total Combined Strokes of Winner"),
             )
             entries.append(entry)
