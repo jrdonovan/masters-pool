@@ -115,7 +115,7 @@ class TournamentLeaderboard:
                 _is_amateur=p["isAmateur"]
             )
 
-            d[player.full_name] = {
+            d[player.id] = {
                 "position": p["position"],
                 "status": p["status"].upper(),
                 "total": p["total"],
@@ -139,11 +139,11 @@ class TournamentLeaderboard:
         This method is useful for displaying the leaderboard in a tabular format.
         """
         data = []
-        for player_name, player_info in self.players.items():
+        for _, player_info in self.players.items():
             rounds = {r["roundId"]: r["scoreToPar"] for r in player_info["rounds"]}
             data.append({
                 "Position": player_info["position"],
-                "Player": player_name,
+                "Player": player_info.player["full_name"],
                 "Total Score": player_info["total"],
                 "Round 1": rounds.get(1, "-"),
                 "Round 2": rounds.get(2, "-"),
