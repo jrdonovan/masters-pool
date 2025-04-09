@@ -1,6 +1,8 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from src.module.fanduel import FanDuel
 from src.module.hole import Hole
 
 
@@ -28,6 +30,7 @@ class PlayerRound:
     _current_round_score: str
     _strokes: int
     _holes: List[Hole] = field(init=False)
+    _hole_results: defaultdict = field(init=False, default_factory=lambda: defaultdict(int))
     _fanduel_score: float = field(init=False, default=0.0)
 
     @property
@@ -69,6 +72,16 @@ class PlayerRound:
         self._holes = value
 
     @property
+    def hole_results(self):
+        return self._hole_results
+
+    @hole_results.setter
+    def hole_results(self, value: defaultdict):
+        if not isinstance(value, defaultdict):
+            raise ValueError("Hole results must be a defaultdict.")
+        self._hole_results = value
+
+    @property
     def fanduel_score(self):
         return self._fanduel_score
 
@@ -88,7 +101,15 @@ class PlayerRound:
 
         self.holes = holes
 
+        self._aggregate_hole_results()
         self._calculate_fanduel_score()
+
+    def _aggregate_hole_results(self) -> None:
+        """
+        Aggregate the hole results for the round.
+        """
+        for hole in self.holes:
+            self.hole_results[hole.result] += 1
 
     def _calculate_fanduel_score(self) -> None:
         """
@@ -97,3 +118,11 @@ class PlayerRound:
         self.fanduel_score = 0
         for hole in self.holes:
             self.fanduel_score += hole.fanduel_score
+
+        fd = FanDuel()
+        if self.complete:
+            bogey_count = self.hole_results.get("BOGEY", 0) + self.hole_results.get("DOUBLE_BOGEY_OR_WORSE", 0)
+            self.fanduel_score += fd.calculate_bogey_free_round_score(bogey_count)
+
+        birdie_or_better_count = self.hole_results.get("BIRDIE", 0) + self.hole_results.get("EAGLE_OR_BETTER", 0)
+        self.fanduel_score += fd.calculate_birdie_or_better_score(birdie_or_better_count)
