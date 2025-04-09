@@ -17,6 +17,7 @@ class PlayerRound:
         _current_round_score (str): The current score of the player in the round.
         _strokes (int): The number of strokes taken by the player in the round.
         _holes (List[Hole]): A list of Hole objects representing the holes played in the round.
+        _fanduel_score (float): The FanDuel score for the round.
     """
 
     _round_id: int
@@ -28,6 +29,10 @@ class PlayerRound:
     _strokes: int
     _holes: List[Hole] = field(init=False)
     _fanduel_score: float = field(init=False, default=0.0)
+
+    @property
+    def round_id(self):
+        return self._round_id
 
     @property
     def player_id(self):
@@ -74,4 +79,9 @@ class PlayerRound:
         self._fanduel_score = value
 
     def calculate_fanduel_score(self):
-        running_score = 0.0
+        """
+        Calculate the FanDuel score for the round.
+        """
+        self.fanduel_score = 0
+        for hole in self.holes:
+            self.fanduel_score += hole.fanduel_score

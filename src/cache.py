@@ -62,6 +62,6 @@ def save_to_cache(data: dict, subfolder: str, filename_prefix: str = None) -> No
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
 
-    filepath = get_cache_filename(datetime.now(), subfolder)
+    filepath = get_cache_filename(datetime.now(), subfolder, filename_prefix)
     with open(filepath, "w") as f:
         json.dump(data, f)
