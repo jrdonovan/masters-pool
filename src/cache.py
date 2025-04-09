@@ -3,28 +3,32 @@ import json
 import os
 
 CACHE_DIR = "data/cache"
-CACHE_TTL_MINS = 5
+CACHE_TTL_MINS = 5  # Cache Time-To-Live in minutes
 
 
-def get_cache_filename(timestamp: datetime) -> str:
-    return os.path.join(CACHE_DIR, f"leaderboard_{timestamp.strftime('%Y%m%d_%H%M%S')}.json")
+def get_cache_filename(timestamp: datetime, cache_path) -> str:
+    return os.path.join(cache_path, f"data_{timestamp.strftime('%Y%m%d_%H%M%S')}.json")
 
 
-def get_latest_cache_file():
+def get_latest_cache_file(subfolder: str) -> str:
     if not os.path.exists(CACHE_DIR):
         print(f"Cache directory {CACHE_DIR} does not exist.")
         return None
-    files = [f for f in os.listdir(CACHE_DIR) if f.endswith(".json")]
+    cache_path = f"{CACHE_DIR}/{subfolder}"
+    if not os.path.exists(cache_path):
+        print(f"Cache subdirectory {cache_path} does not exist.")
+        return None
+    files = [f for f in os.listdir(cache_path) if f.endswith(".json")]
     if not files:
         print("No cache files found.")
         return None
     files = sorted(files, reverse=True)
-    latest_cache_file = os.path.join(CACHE_DIR, files[0])
+    latest_cache_file = os.path.join(cache_path, files[0])
     print(f"Latest cache file: {latest_cache_file}")
     return latest_cache_file
 
 
-def is_cache_fresh(filepath):
+def is_cache_fresh(filepath: str) -> bool:
     if not filepath or not os.path.exists(filepath):
         print(f"Cache file {filepath} does not exist.")
         return False
@@ -39,15 +43,15 @@ def is_cache_fresh(filepath):
     return is_fresh
 
 
-def load_from_cache(filepath):
+def load_from_cache(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
 
 
-def save_to_cache(data):
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR)
-    now = datetime.now()
-    filepath = get_cache_filename(now)
+def save_to_cache(data: dict, subfolder: str) -> None:
+    cache_path = f"{CACHE_DIR}/{subfolder}"
+    if not os.path.exists(cache_path):
+        os.makedirs(cache_path)
+    filepath = get_cache_filename(datetime.now(), cache_path)
     with open(filepath, "w") as f:
         json.dump(data, f)
