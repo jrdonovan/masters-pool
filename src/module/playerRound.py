@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict
 
 from src.module.hole import Hole
 
@@ -78,7 +78,19 @@ class PlayerRound:
             raise ValueError("Fanduel score must be a number.")
         self._fanduel_score = value
 
-    def calculate_fanduel_score(self):
+    def initialize_holes(self, hole_data: Dict) -> None:
+        holes = []
+        for _, hole in hole_data.items():
+            hole_obj = Hole(
+                _id=hole["holeId"], _par=hole["par"], _score=hole["holeScore"]
+            )
+            holes.append(hole_obj)
+
+        self.holes = holes
+
+        self._calculate_fanduel_score()
+
+    def _calculate_fanduel_score(self) -> None:
         """
         Calculate the FanDuel score for the round.
         """

@@ -44,6 +44,10 @@ class Scorecard:
         return self._total
 
     @property
+    def course_id(self):
+        return self._course_id
+
+    @property
     def player_rounds(self):
         return self._player_rounds
 
@@ -75,6 +79,8 @@ class Scorecard:
                 _current_round_score=round["currentRoundScore"],
                 _strokes=round["totalShots"],
             )
+
+            round_obj.initialize_holes(round["holes"])
             rounds.append(round_obj)
         self.player_rounds = rounds
 
