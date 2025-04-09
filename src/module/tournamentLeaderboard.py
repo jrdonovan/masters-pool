@@ -117,6 +117,13 @@ class TournamentLeaderboard:
                 _is_amateur=p["isAmateur"],
             )
 
+            player.initialize_scorecard(
+                position=p["position"],
+                status=p["status"],
+                total=p["total"],
+                course_id=p["courseId"],
+            )
+
             d[player.id] = {
                 "position": p["position"],
                 "status": p["status"].upper(),
@@ -126,14 +133,17 @@ class TournamentLeaderboard:
             }
         self.players = d
 
-    def initialize_player_scorecards(self):
-        for p in self.players:
-            p.initialize_scorecard(
-                status=p.playing_info["status"],
-                position=p.playing_info["position"],
-                total=p.playing_info["total"],
-                course_id=p.playing_info["course_id"],
-            )
+    def get_player_by_name(self, first_name: str, last_name: str) -> Player:
+        """
+        Returns the player object based on the first and last name.
+        """
+        for _, player_info in self.players.items():
+            if (
+                player_info["player"].first_name == first_name
+                and player_info["player"].last_name == last_name
+            ):
+                return player_info["player"]
+        return None
 
     def to_dataframe(self) -> pd.DataFrame:
         """
