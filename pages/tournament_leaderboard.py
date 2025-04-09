@@ -7,6 +7,7 @@ from src.module.tournamentLeaderboard import TournamentLeaderboard
 
 CACHE_SUBFOLDER = "tournament_leaderboard"
 
+
 def fetch_tournament_leaderboard() -> dict:
     """
     Fetches the tournament leaderboard data
@@ -25,6 +26,7 @@ def fetch_tournament_leaderboard() -> dict:
     print("Fetched leaderboard data from API and saved to cache.")
     return leaderboard_data
 
+
 def load_tournament_leaderboard() -> pd.DataFrame:
     """
     Loads the tournament leaderboard data and returns it as a DataFrame.
@@ -39,7 +41,7 @@ def load_tournament_leaderboard() -> pd.DataFrame:
         _current_round_status=leaderboard_data["roundStatus"],
         _current_round_id=leaderboard_data["roundId"],
         _last_updated=leaderboard_data["lastUpdated"],
-        _cut_lines=leaderboard_data["cutLines"]
+        _cut_lines=leaderboard_data["cutLines"],
     )
     tl.initialize_players(leaderboard_data["leaderboardRows"])
     st.session_state.tournament_leaderboard = tl
@@ -48,11 +50,13 @@ def load_tournament_leaderboard() -> pd.DataFrame:
     return df
 
 
-st.set_page_config(page_title="Tournament Leaderboard", page_icon=":golfer:", layout="wide")
+st.set_page_config(
+    page_title="Tournament Leaderboard", page_icon=":golfer:", layout="wide"
+)
 st.title("Tournament Leaderboard")
 
 # 🔁 Auto-refresh every 1 minute
-st_autorefresh(interval=60*1000, key="refresh")
+st_autorefresh(interval=60 * 1000, key="refresh")
 
 df = load_tournament_leaderboard()
 st.dataframe(df)

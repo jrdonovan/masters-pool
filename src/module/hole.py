@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+
 @dataclass
 class Hole:
     """
@@ -9,6 +10,7 @@ class Hole:
         _par (int): The par value of the hole.
         _previous_hole_id (int): The ID of the previous hole.
     """
+
     _hole_id: int
     _par: int
     _previous_hole_id: int = field(init=False)
@@ -44,4 +46,8 @@ class Hole:
         """
         Helper method to calculate the previous hole ID.
         """
-        self.previous_hole_id = (18 if self.hole_id == 1 else self.hole_id - 1) if self.hole_id > 1 else None
+        self.previous_hole_id = (
+            (18 if self.hole_id == 1 else self.hole_id - 1)
+            if self.hole_id > 1
+            else None
+        )

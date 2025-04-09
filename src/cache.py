@@ -7,7 +7,10 @@ CACHE_TTL_MINS = 5  # Cache Time-To-Live in minutes
 
 
 def get_cache_filename(timestamp: datetime, subfolder) -> str:
-    return os.path.join(f"{CACHE_DIR}/{subfolder}", f"{subfolder}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json")
+    return os.path.join(
+        f"{CACHE_DIR}/{subfolder}",
+        f"{subfolder}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json",
+    )
 
 
 def get_latest_cache_file(subfolder: str) -> str:

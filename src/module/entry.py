@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict
 
+
 @dataclass
 class Entry:
     _timestamp: datetime
@@ -70,12 +71,11 @@ class Entry:
         self._strokes = value
 
     def to_dict(self) -> dict:
-        d = {
-            "timestamp": self._timestamp,
-            "email": self._email,
-            "name": self._name
+        d = {"timestamp": self._timestamp, "email": self._email, "name": self._name}
+        parsed_players = {
+            k: list(map(lambda x: x.strip(), v.split(",")))
+            for k, v in self._players.items()
         }
-        parsed_players = {k: list(map(lambda x: x.strip(), v.split(","))) for k, v in self._players.items()}
         d = {**d, **parsed_players}
         d["strokes"] = self._strokes
         return d

@@ -7,6 +7,7 @@ from typing import List, Dict
 from src.module.player import Player
 import src.utils as utils
 
+
 @dataclass
 class TournamentLeaderboard:
     """
@@ -22,6 +23,7 @@ class TournamentLeaderboard:
         _cut_lines (List[Dict]): The cut lines for the tournament.
         _players (OrderedDict): The players in the tournament.
     """
+
     _org_id: int
     _year: str
     _tourn_id: str
@@ -112,7 +114,7 @@ class TournamentLeaderboard:
                 _id=p["playerId"],
                 _first_name=p["firstName"],
                 _last_name=p["lastName"],
-                _is_amateur=p["isAmateur"]
+                _is_amateur=p["isAmateur"],
             )
 
             d[player.id] = {
@@ -120,7 +122,7 @@ class TournamentLeaderboard:
                 "status": p["status"].upper(),
                 "total": p["total"],
                 "player": player,
-                "rounds": p["rounds"]
+                "rounds": p["rounds"],
             }
         self.players = d
 
@@ -130,7 +132,7 @@ class TournamentLeaderboard:
                 status=p.playing_info["status"],
                 position=p.playing_info["position"],
                 total=p.playing_info["total"],
-                course_id=p.playing_info["course_id"]
+                course_id=p.playing_info["course_id"],
             )
 
     def to_dataframe(self) -> pd.DataFrame:
@@ -141,16 +143,18 @@ class TournamentLeaderboard:
         data = []
         for _, player_info in self.players.items():
             rounds = {r["roundId"]: r["scoreToPar"] for r in player_info["rounds"]}
-            data.append({
-                "Position": player_info["position"],
-                "Player": player_info["player"].full_name,
-                "Total Score": player_info["total"],
-                "Round 1": rounds.get(1, "-"),
-                "Round 2": rounds.get(2, "-"),
-                "Round 3": rounds.get(3, "-"),
-                "Round 4": rounds.get(4, "-"),
-                "Status": player_info["status"]
-            })
+            data.append(
+                {
+                    "Position": player_info["position"],
+                    "Player": player_info["player"].full_name,
+                    "Total Score": player_info["total"],
+                    "Round 1": rounds.get(1, "-"),
+                    "Round 2": rounds.get(2, "-"),
+                    "Round 3": rounds.get(3, "-"),
+                    "Round 4": rounds.get(4, "-"),
+                    "Status": player_info["status"],
+                }
+            )
         df = pd.DataFrame(data)
         df.index += 1
         return df
