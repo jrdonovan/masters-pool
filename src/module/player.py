@@ -15,6 +15,7 @@ class Player:
         _is_amateur (bool): Indicator of a player's amateur status.
         _full_name (str): The full name of the player.
         _scorecard (Scorecard): The player's scorecard in the tournament.
+        _fanduel_score (float): The FanDuel score for the player.
     """
 
     _id: int
@@ -23,6 +24,7 @@ class Player:
     _is_amateur: bool
     _full_name: str = field(init=False, default="")
     _scorecard: Scorecard = field(init=False, repr=False)
+    _fanduel_score: float = field(init=False, default=0.0)
 
     def __post_init__(self):
         self.full_name = f"{self.first_name} {self.last_name}"
@@ -62,6 +64,16 @@ class Player:
         if not isinstance(value, Scorecard):
             raise ValueError("Scorecard must be a Scorecard object.")
         self._scorecard = value
+
+    @property
+    def fanduel_score(self):
+        return self._fanduel_score
+
+    @fanduel_score.setter
+    def fanduel_score(self, value: float):
+        if not isinstance(value, (int, float)):
+            raise ValueError("Fanduel score must be a number.")
+        self._fanduel_score = value
 
     def initialize_scorecard(
         self, status: str, position: int, total: int, course_id: str
