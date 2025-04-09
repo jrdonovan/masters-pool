@@ -69,7 +69,7 @@ class Entry:
             raise ValueError("Strokes must be an integer.")
         self._strokes = value
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         d = {
             "timestamp": self._timestamp,
             "email": self._email,

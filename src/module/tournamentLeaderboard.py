@@ -143,7 +143,7 @@ class TournamentLeaderboard:
             rounds = {r["roundId"]: r["scoreToPar"] for r in player_info["rounds"]}
             data.append({
                 "Position": player_info["position"],
-                "Player": player_info.player["full_name"],
+                "Player": player_info["player"].full_name,
                 "Total Score": player_info["total"],
                 "Round 1": rounds.get(1, "-"),
                 "Round 2": rounds.get(2, "-"),

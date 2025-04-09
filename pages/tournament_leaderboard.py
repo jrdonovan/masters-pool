@@ -5,12 +5,13 @@ from streamlit_autorefresh import st_autorefresh
 import src.cache as cache
 from src.module.tournamentLeaderboard import TournamentLeaderboard
 
+CACHE_SUBFOLDER = "tournament_leaderboard"
 
 def fetch_tournament_leaderboard() -> dict:
     """
     Fetches the tournament leaderboard data
     """
-    latest_file = cache.get_latest_cache_file()
+    latest_file = cache.get_latest_cache_file(CACHE_SUBFOLDER)
 
     if cache.is_cache_fresh(latest_file):
         print("Fetched leaderboard data from cache.")
@@ -20,11 +21,14 @@ def fetch_tournament_leaderboard() -> dict:
 
     api = LiveGolfData()
     leaderboard_data = api.get_leaderboard()
-    cache.save_to_cache(leaderboard_data)
+    cache.save_to_cache(leaderboard_data, CACHE_SUBFOLDER)
     print("Fetched leaderboard data from API and saved to cache.")
     return leaderboard_data
 
 def load_tournament_leaderboard() -> pd.DataFrame:
+    """
+    Loads the tournament leaderboard data and returns it as a DataFrame.
+    """
     leaderboard_data = fetch_tournament_leaderboard()
 
     tl = TournamentLeaderboard(
@@ -48,7 +52,7 @@ st.set_page_config(page_title="Tournament Leaderboard", page_icon=":golfer:", la
 st.title("Tournament Leaderboard")
 
 # 🔁 Auto-refresh every 1 minute
-# st_autorefresh(interval=60 * 1000, key="refresh")
+st_autorefresh(interval=60*1000, key="refresh")
 
 df = load_tournament_leaderboard()
 st.dataframe(df)

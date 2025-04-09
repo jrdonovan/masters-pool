@@ -6,8 +6,8 @@ CACHE_DIR = "data/cache"
 CACHE_TTL_MINS = 5  # Cache Time-To-Live in minutes
 
 
-def get_cache_filename(timestamp: datetime, cache_path) -> str:
-    return os.path.join(cache_path, f"data_{timestamp.strftime('%Y%m%d_%H%M%S')}.json")
+def get_cache_filename(timestamp: datetime, subfolder) -> str:
+    return os.path.join(f"{CACHE_DIR}/{subfolder}", f"{subfolder}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json")
 
 
 def get_latest_cache_file(subfolder: str) -> str:
@@ -30,7 +30,7 @@ def get_latest_cache_file(subfolder: str) -> str:
 
 def is_cache_fresh(filepath: str) -> bool:
     if not filepath or not os.path.exists(filepath):
-        print(f"Cache file {filepath} does not exist.")
+        print("Cache file does not exist.")
         return False
     modified_time = datetime.fromtimestamp(os.path.getmtime(filepath))
 
@@ -52,6 +52,6 @@ def save_to_cache(data: dict, subfolder: str) -> None:
     cache_path = f"{CACHE_DIR}/{subfolder}"
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
-    filepath = get_cache_filename(datetime.now(), cache_path)
+    filepath = get_cache_filename(datetime.now(), subfolder)
     with open(filepath, "w") as f:
         json.dump(data, f)

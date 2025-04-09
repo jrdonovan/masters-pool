@@ -4,6 +4,7 @@ from typing import Dict
 from src.module.playerRound import PlayerRound
 from src.module.scorecard import Scorecard
 
+
 @dataclass
 class Player:
     """
