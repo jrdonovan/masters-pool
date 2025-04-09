@@ -5,10 +5,10 @@ import streamlit as st
 
 
 def main():
-    home_page = st.Page("pages/home.py", title="Home")
-    entries_page = st.Page("pages/raw_entries.py", title="Raw Entries")
+    home_page = st.Page("pages/home.py", title="Home", default=True)
+    entries_page = st.Page("pages/entries.py", title="Entries")
     pool_leaderboard_page = st.Page(
-        "pages/pool_leaderboard.py", title="Pool Leaderboard", default=True
+        "pages/pool_leaderboard.py", title="Pool Leaderboard"
     )
     tournament_leaderboard_page = st.Page(
         "pages/tournament_leaderboard.py", title="Tournament Leaderboard"
