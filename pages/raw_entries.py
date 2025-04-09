@@ -22,7 +22,7 @@ def fetch_entries() -> list:
     gc = gspread.service_account_from_dict(
         info=st.secrets["google"]
     )
-    data = gc.open("Masters Pool 2025 (Responses)").sheet1.get_all_records()
+    data = gc.open(st.secrets["SHEET_NAME"]).sheet1.get_all_records()
     cache.save_to_cache(data, CACHE_SUBFOLDER)
     print("Fetched entries from API and saved to cache.")
     return data
