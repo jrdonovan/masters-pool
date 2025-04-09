@@ -6,25 +6,31 @@ CACHE_DIR = "data/cache"
 CACHE_TTL_MINS = 5  # Cache Time-To-Live in minutes
 
 
-def get_cache_filename(timestamp: datetime, subfolder) -> str:
-    return os.path.join(
-        f"{CACHE_DIR}/{subfolder}",
-        f"{subfolder}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json",
-    )
+def get_cache_filename(timestamp: datetime, subfolder: str, filename_prefix: str = None) -> str:
+    path = f"{CACHE_DIR}/{subfolder}"
+    if filename_prefix:
+        filename = f"{filename_prefix}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json"
+    else:
+        filename = f"{subfolder}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json"
+
+    return os.path.join(path, filename)
 
 
 def get_latest_cache_file(subfolder: str) -> str:
     if not os.path.exists(CACHE_DIR):
         print(f"Cache directory {CACHE_DIR} does not exist.")
         return None
+
     cache_path = f"{CACHE_DIR}/{subfolder}"
     if not os.path.exists(cache_path):
         print(f"Cache subdirectory {cache_path} does not exist.")
         return None
+
     files = [f for f in os.listdir(cache_path) if f.endswith(".json")]
     if not files:
         print("No cache files found.")
         return None
+
     files = sorted(files, reverse=True)
     latest_cache_file = os.path.join(cache_path, files[0])
     print(f"Latest cache file: {latest_cache_file}")
@@ -51,10 +57,11 @@ def load_from_cache(filepath: str):
         return json.load(f)
 
 
-def save_to_cache(data: dict, subfolder: str) -> None:
+def save_to_cache(data: dict, subfolder: str, filename_prefix: str = None) -> None:
     cache_path = f"{CACHE_DIR}/{subfolder}"
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
+
     filepath = get_cache_filename(datetime.now(), subfolder)
     with open(filepath, "w") as f:
         json.dump(data, f)
