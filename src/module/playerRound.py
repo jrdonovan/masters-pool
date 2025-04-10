@@ -1,9 +1,11 @@
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from dataclasses import dataclass, field
-from typing import List, Dict
+from decimal import Decimal
+from typing import Dict
 
 from src.module.fanduel import FanDuel
 from src.module.hole import Hole
+import src.utils.parse as parse
 
 
 @dataclass
@@ -19,7 +21,8 @@ class PlayerRound:
         _current_round_score (str): The current score of the player in the round.
         _strokes (int): The number of strokes taken by the player in the round.
         _holes (List[Hole]): A list of Hole objects representing the holes played in the round.
-        _fanduel_score (float): The FanDuel score for the round.
+        _hole_results (defaultdict): A dictionary to store the results of each hole.
+        _fanduel_score (Decimal): The FanDuel score for the round.
     """
 
     _round_id: int
@@ -29,13 +32,24 @@ class PlayerRound:
     _current_hole: int
     _current_round_score: str
     _strokes: int
-    _holes: List[Hole] = field(init=False)
+    _holes: OrderedDict = field(init=False, repr=False, default_factory=lambda: OrderedDict())
     _hole_results: defaultdict = field(init=False, default_factory=lambda: defaultdict(int))
-    _fanduel_score: float = field(init=False, default=0.0)
+    _fanduel_score: Decimal = field(init=False, default=Decimal("0"))
+
+    def __post_init__(self):
+        self.round_id = parse.parse_dict_to_number(self.round_id)
+        self.starting_hole = parse.parse_dict_to_number(self.starting_hole)
+        self.current_hole = parse.parse_dict_to_number(self.current_hole)
 
     @property
     def round_id(self):
         return self._round_id
+
+    @round_id.setter
+    def round_id(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Round ID must be an integer.")
+        self._round_id = value
 
     @property
     def player_id(self):
@@ -49,9 +63,21 @@ class PlayerRound:
     def starting_hole(self):
         return self._starting_hole
 
+    @starting_hole.setter
+    def starting_hole(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Starting hole must be an integer.")
+        self._starting_hole = value
+
     @property
     def current_hole(self):
         return self._current_hole
+
+    @current_hole.setter
+    def current_hole(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("Current hole must be an integer.")
+        self._current_hole = value
 
     @property
     def current_round_score(self):
@@ -66,9 +92,9 @@ class PlayerRound:
         return self._holes
 
     @holes.setter
-    def holes(self, value: List[Hole]):
-        if not isinstance(value, list):
-            raise ValueError("Holes must be a list.")
+    def holes(self, value: OrderedDict):
+        if not isinstance(value, OrderedDict):
+            raise ValueError("Holes must be an ordered dictionary.")
         self._holes = value
 
     @property
@@ -86,20 +112,17 @@ class PlayerRound:
         return self._fanduel_score
 
     @fanduel_score.setter
-    def fanduel_score(self, value: float):
-        if not isinstance(value, (int, float)):
+    def fanduel_score(self, value: Decimal):
+        if not isinstance(value, Decimal):
             raise ValueError("Fanduel score must be a number.")
         self._fanduel_score = value
 
     def initialize_holes(self, hole_data: Dict) -> None:
-        holes = []
         for _, hole in hole_data.items():
             hole_obj = Hole(
                 _id=hole["holeId"], _par=hole["par"], _score=hole["holeScore"]
             )
-            holes.append(hole_obj)
-
-        self.holes = holes
+            self.holes[hole_obj.id] = hole_obj
 
         self._aggregate_hole_results()
         self._calculate_fanduel_score()
@@ -108,21 +131,25 @@ class PlayerRound:
         """
         Aggregate the hole results for the round.
         """
-        for hole in self.holes:
+        for _, hole in self.holes.items():
             self.hole_results[hole.result] += 1
 
     def _calculate_fanduel_score(self) -> None:
         """
         Calculate the FanDuel score for the round.
         """
-        self.fanduel_score = 0
-        for hole in self.holes:
+        self.fanduel_score = Decimal("0")
+        for _, hole in self.holes.items():
             self.fanduel_score += hole.fanduel_score
 
-        fd = FanDuel()
+            if hole.id != self.starting_hole:
+                previous_hole_result = self.holes.get(hole.previous_hole_id).result
+                self.fanduel_score += FanDuel.calculate_streak_score(hole.result, previous_hole_result)
+                self.fanduel_score += FanDuel.calculate_bounce_back_score(hole.result, previous_hole_result)
+
         if self.complete:
             bogey_count = self.hole_results.get("BOGEY", 0) + self.hole_results.get("DOUBLE_BOGEY_OR_WORSE", 0)
-            self.fanduel_score += fd.calculate_bogey_free_round_score(bogey_count)
+            self.fanduel_score += FanDuel.calculate_bogey_free_round_score(bogey_count)
 
         birdie_or_better_count = self.hole_results.get("BIRDIE", 0) + self.hole_results.get("EAGLE_OR_BETTER", 0)
-        self.fanduel_score += fd.calculate_birdie_or_better_score(birdie_or_better_count)
+        self.fanduel_score += FanDuel.calculate_birdie_or_better_score(birdie_or_better_count)

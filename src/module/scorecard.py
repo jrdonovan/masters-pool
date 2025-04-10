@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import List, Dict
 
 from src.module.fanduel import FanDuel
@@ -16,7 +17,7 @@ class Scorecard:
         _total (int): The total score of the player.
         _course_id (str): The ID of the golf course.
         _player_rounds (List[PlayerRound]): A list of PlayerRound objects representing the player's rounds.
-        _fanduel_score (float): The FanDuel score for the scorecard.
+        _fanduel_score (Decimal): The FanDuel score for the scorecard.
     """
 
     _player_id: int
@@ -25,7 +26,7 @@ class Scorecard:
     _total: int
     _course_id: str
     _player_rounds: List[PlayerRound] = field(init=False)
-    _fanduel_score: float = field(init=False, default=0.0)
+    _fanduel_score: Decimal = field(init=False, default=Decimal("0"))
 
     @property
     def player_id(self):
@@ -62,8 +63,8 @@ class Scorecard:
         return self._fanduel_score
 
     @fanduel_score.setter
-    def fanduel_score(self, value: float):
-        if not isinstance(value, (int, float)):
+    def fanduel_score(self, value: Decimal):
+        if not isinstance(value, Decimal):
             raise ValueError("Fanduel score must be a number.")
         self._fanduel_score = value
 
@@ -90,9 +91,8 @@ class Scorecard:
         """
         Calculate the FanDuel score for the scorecard.
         """
-        self.fanduel_score = 0.0
+        self.fanduel_score = Decimal("0")
         for round in self.player_rounds:
             self.fanduel_score += round.fanduel_score
 
-        fd = FanDuel()
-        self.fanduel_score = fd.calculate_position_score(self.position)
+        self.fanduel_score += FanDuel.calculate_position_score(self.position)

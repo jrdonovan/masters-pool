@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from decimal import Decimal
 
 from src.module.fanduel import FanDuel
 import src.utils.parse as parse
@@ -14,7 +15,7 @@ class Hole:
         _score (int): The number of strokes taken by the player on the hole.
         _previous_hole_id (int): The ID of the previous hole.
         _result (str): The result of the hole (e.g., "EAGLE", "BIRDIE", "PAR", "BOGEY").
-        _fanduel_score (float): The FanDuel score for the hole.
+        _fanduel_score (Decimal): The FanDuel score for the hole.
     """
 
     _id: int
@@ -22,7 +23,7 @@ class Hole:
     _score: int
     _previous_hole_id: int = field(init=False, repr=False)
     _result: str = field(init=False, default="")
-    _fanduel_score: float = field(init=False, default=0.0)
+    _fanduel_score: Decimal = field(init=False, default=Decimal("0"))
 
     def __post_init__(self):
         self.id = parse.parse_dict_to_number(self.id)
@@ -87,8 +88,8 @@ class Hole:
         return self._fanduel_score
 
     @fanduel_score.setter
-    def fanduel_score(self, value: float):
-        if not isinstance(value, (int, float)):
+    def fanduel_score(self, value: Decimal):
+        if not isinstance(value, Decimal):
             raise ValueError("FanDuel score must be a number.")
         self._fanduel_score = value
 
@@ -111,5 +112,4 @@ class Hole:
         """
         Calculate the FanDuel score for the hole.
         """
-        fd = FanDuel()
-        self.fanduel_score = fd.calculate_hole_result_score(self.result)
+        self.fanduel_score = FanDuel.calculate_hole_result_score(self.result)

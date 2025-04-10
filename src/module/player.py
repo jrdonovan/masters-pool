@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from decimal import Decimal
 from unidecode import unidecode
 
 from src.module.scorecard import Scorecard
@@ -16,7 +17,7 @@ class Player:
         _is_amateur (bool): Indicator of a player's amateur status.
         _full_name (str): The full name of the player.
         _scorecard (Scorecard): The player's scorecard in the tournament.
-        _fanduel_score (float): The FanDuel score for the player.
+        _fanduel_score (Decimal): The FanDuel score for the player.
     """
 
     _id: int
@@ -25,7 +26,7 @@ class Player:
     _is_amateur: bool
     _full_name: str = field(init=False, default="")
     _scorecard: Scorecard = field(init=False, repr=False)
-    _fanduel_score: float = field(init=False, default=0.0)
+    _fanduel_score: Decimal = field(init=False, default=Decimal("0"))
 
     def __post_init__(self):
         self.first_name = unidecode(self.first_name)
@@ -85,8 +86,8 @@ class Player:
         return self._fanduel_score
 
     @fanduel_score.setter
-    def fanduel_score(self, value: float):
-        if not isinstance(value, (int, float)):
+    def fanduel_score(self, value: Decimal):
+        if not isinstance(value, Decimal):
             raise ValueError("Fanduel score must be a number.")
         self._fanduel_score = value
 

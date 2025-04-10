@@ -32,7 +32,7 @@ class TournamentLeaderboard:
     _current_round_id: int
     _last_updated: datetime
     _cut_lines: List[Dict]
-    _players: OrderedDict = field(init=False, default_factory=OrderedDict)
+    _players: OrderedDict = field(init=False, default_factory=lambda: OrderedDict())
 
     def __post_init__(self):
         self.current_round_id = parse.parse_dict_to_number(self.current_round_id)
@@ -104,7 +104,6 @@ class TournamentLeaderboard:
         self._players = value
 
     def initialize_players(self, leaderboard_data: List) -> None:
-        d = OrderedDict()
         for p in leaderboard_data:
             for r in p["rounds"]:
                 r["roundId"] = parse.parse_dict_to_number(r["roundId"])
@@ -124,14 +123,14 @@ class TournamentLeaderboard:
                 course_id=p["courseId"],
             )
 
-            d[player.id] = {
+            self.players[player.id] = {
                 "position": p["position"],
                 "status": p["status"].upper(),
                 "total": p["total"],
                 "player": player,
                 "rounds": p["rounds"],
             }
-        self.players = d
+
 
     def get_player_by_name(self, first_name: str, last_name: str) -> Player:
         """
@@ -157,12 +156,13 @@ class TournamentLeaderboard:
                 {
                     "Position": player_info["position"],
                     "Player": player_info["player"].full_name,
+                    "FanDuel Score": player_info["player"].fanduel_score,
                     "Total Score": player_info["total"],
                     "Round 1": rounds.get(1, "-"),
                     "Round 2": rounds.get(2, "-"),
                     "Round 3": rounds.get(3, "-"),
                     "Round 4": rounds.get(4, "-"),
-                    "Status": player_info["status"],
+                    "Status": player_info["status"]
                 }
             )
         df = pd.DataFrame(data)
