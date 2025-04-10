@@ -78,7 +78,6 @@ class FanDuel:
             "BIRDIE",
             "EAGLE_OR_BETTER",
         ]:
-            print("Streak +0.6")
             return Decimal("0.6")
         else:
             return Decimal("0")
@@ -91,7 +90,6 @@ class FanDuel:
             "BOGEY",
             "DOUBLE_BOGEY_OR_WORSE",
         ]:
-            print("Bounce back +0.3")
             return Decimal("0.3")
         else:
             return Decimal("0")
